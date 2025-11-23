@@ -19,14 +19,14 @@ from network_tools import (
     handle_ping,
     handle_traceroute,
     handle_ipinfo,
-    handle_speedtest
+    handle_speedtest,
+    handle_wol
 )
 from productivity_tools import (
     handle_reminder,
     handle_todo,
     handle_weather,
-    handle_quote,
-    handle_translate
+    handle_quote
 )
 from ai_handler import handle_ai_message
 
@@ -54,6 +54,7 @@ def get_network_tools_keyboard():
         [InlineKeyboardButton("🛤️ Traceroute", callback_data="cmd_traceroute")],
         [InlineKeyboardButton("📍 IP Info", callback_data="cmd_ipinfo")],
         [InlineKeyboardButton("⚡ Speedtest", callback_data="cmd_speedtest")],
+        [InlineKeyboardButton("🔌 Wake-on-LAN", callback_data="cmd_wol")],
         [InlineKeyboardButton("🔙 Back to Main Menu", callback_data="main_menu")],
     ]
     return InlineKeyboardMarkup(keyboard)
@@ -66,7 +67,6 @@ def get_productivity_tools_keyboard():
         [InlineKeyboardButton("✅ Todo", callback_data="cmd_todo")],
         [InlineKeyboardButton("🌤️ Weather", callback_data="cmd_weather")],
         [InlineKeyboardButton("💬 Quote", callback_data="cmd_quote")],
-        [InlineKeyboardButton("🌍 Translate", callback_data="cmd_translate")],
         [InlineKeyboardButton("🔙 Back to Main Menu", callback_data="main_menu")],
     ]
     return InlineKeyboardMarkup(keyboard)
@@ -101,9 +101,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "**Productivity Tools:**\n"
         "• `/reminder <time> <message>` - Set a reminder\n"
         "• `/todo <add|remove|list> [task]` - Manage todo list\n"
-        "• `/weather <city>` - Get weather for a city\n"
-        "• `/quote` - Get a motivational quote\n"
-        "• `/translate <text> <target_lang>` - Translate text\n\n"
+        "• `/weather` - Get weather for Addis Ababa, Ethiopia\n"
+        "• `/quote` - Get a motivational quote\n\n"
         "**AI Assistant:**\n"
         "• `@rbot <your question>` - Ask anything to the AI assistant\n"
         "  Example: `@rbot What is Python?`\n"
@@ -163,6 +162,16 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == "cmd_speedtest":
         await query.edit_message_text("⚡ Starting speedtest... This may take a moment.")
         await handle_speedtest(update, context)
+    elif query.data == "cmd_wol":
+        await query.edit_message_text(
+            "🔌 **Wake-on-LAN Tool**\n\n"
+            "Send me a MAC address to wake up a PC.\n\n"
+            "**Format:** `00:11:22:33:44:55`\n"
+            "**Example:** `00:1B:44:11:3A:B7`\n\n"
+            "**Note:** Only authorized users can use this command.",
+            parse_mode='Markdown'
+        )
+        context.user_data['waiting_for'] = 'wol'
     elif query.data == "cmd_reminder":
         await query.edit_message_text(
             "⏰ **Reminder Tool**\n\n"
@@ -191,17 +200,6 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif query.data == "cmd_quote":
         await query.edit_message_text("💬 Fetching a motivational quote...")
         await handle_quote(update, context)
-    elif query.data == "cmd_translate":
-        await query.edit_message_text(
-            "🌍 **Translate Tool**\n\n"
-            "Format: `<text> <target_language_code>`\n\n"
-            "Example: `Hello world en` (translates to English)\n"
-            "Example: `Bonjour fr` (translates to French)\n\n"
-            "Common codes: en, es, fr, de, it, pt, ru, zh, ja",
-            parse_mode='Markdown'
-        )
-        context.user_data['waiting_for'] = 'translate'
-
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle text messages based on what the user is waiting for"""
@@ -224,14 +222,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif waiting_for == 'ipinfo':
         await handle_ipinfo(update, context)
         context.user_data.pop('waiting_for', None)
+    elif waiting_for == 'wol':
+        await handle_wol(update, context)
+        context.user_data.pop('waiting_for', None)
     elif waiting_for == 'weather':
         await handle_weather(update, context)
         context.user_data.pop('waiting_for', None)
     elif waiting_for == 'reminder':
         await handle_reminder(update, context)
-        context.user_data.pop('waiting_for', None)
-    elif waiting_for == 'translate':
-        await handle_translate(update, context)
         context.user_data.pop('waiting_for', None)
     else:
         await update.message.reply_text(
@@ -269,13 +267,14 @@ def main():
     application.add_handler(CommandHandler("traceroute", handle_traceroute))
     application.add_handler(CommandHandler("ipinfo", handle_ipinfo))
     application.add_handler(CommandHandler("speedtest", handle_speedtest))
+    application.add_handler(CommandHandler("wol", handle_wol))
+    application.add_handler(CommandHandler("wake_pc", handle_wol))
     
     # Productivity Tools commands
     application.add_handler(CommandHandler("reminder", handle_reminder))
     application.add_handler(CommandHandler("todo", handle_todo))
     application.add_handler(CommandHandler("weather", handle_weather))
     application.add_handler(CommandHandler("quote", handle_quote))
-    application.add_handler(CommandHandler("translate", handle_translate))
     
     # Button callback handler
     application.add_handler(CallbackQueryHandler(button_callback))

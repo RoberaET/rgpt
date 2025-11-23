@@ -21,3 +21,9 @@ WEATHERAPI_KEY = "YOUR_WEATHERAPI_KEY_HERE"
 # Leave empty if you don't want to use AI features
 GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE"
 
+# Wake-on-LAN Security: Allowed Telegram User ID(s)
+# Get your user ID by messaging @userinfobot on Telegram
+# Can be a single ID: ALLOWED_USER_ID = 123456789
+# Or a list for multiple users: ALLOWED_USER_ID = [123456789, 987654321]
+ALLOWED_USER_ID = YOUR_TELEGRAM_USER_ID_HERE
+

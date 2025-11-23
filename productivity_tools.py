@@ -1,6 +1,6 @@
 """
 Productivity Tools Module
-Handles reminder, todo, weather, quote, and translate commands
+Handles reminder, todo, weather, and quote commands
 """
 
 import json
@@ -185,32 +185,17 @@ async def handle_todo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def handle_weather(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle weather command using OpenWeatherMap API"""
+    """Handle weather command - Always returns weather for Ethiopia Addis Ababa"""
     try:
-        # Get city from command args or message text
-        if update.message:
-            city = ' '.join(context.args) if context.args else update.message.text.strip()
-        else:
-            city = ' '.join(context.args) if context.args else None
-        
-        if not city or city.startswith('/'):
-            await update.message.reply_text(
-                "❌ Please provide a city name.\n"
-                "Usage: `/weather <city>`\n"
-                "Example: `/weather London`",
-                parse_mode='Markdown'
-            )
-            return
-
         message = update.message or update.callback_query.message
-        await message.reply_text(f"🌤️ Fetching weather for {city}...")
+        await message.reply_text("🌤️ Fetching weather for Addis Ababa, Ethiopia...")
 
         try:
             from config import WEATHERAPI_KEY
             url = "https://api.weatherapi.com/v1/current.json"
             params = {
                 'key': WEATHERAPI_KEY,
-                'q': city,
+                'q': 'Addis Ababa, Ethiopia',
                 'aqi': 'no'
             }
             
@@ -222,7 +207,7 @@ async def handle_weather(update: Update, context: ContextTypes.DEFAULT_TYPE):
             location = data.get('location', {})
             current = data.get('current', {})
             
-            weather_text = f"🌤️ **Weather in {location.get('name', city)}, {location.get('country', 'N/A')}**\n\n"
+            weather_text = f"🌤️ **Weather in {location.get('name', 'Addis Ababa')}, {location.get('country', 'Ethiopia')}**\n\n"
             weather_text += f"🌡️ **Temperature:** {current.get('temp_c', 'N/A')}°C ({current.get('temp_f', 'N/A')}°F)\n"
             weather_text += f"🌡️ **Feels like:** {current.get('feelslike_c', 'N/A')}°C ({current.get('feelslike_f', 'N/A')}°F)\n"
             weather_text += f"☁️ **Condition:** {current.get('condition', {}).get('text', 'N/A')}\n"
@@ -243,13 +228,7 @@ async def handle_weather(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
         except requests.RequestException as e:
             logger.error(f"WeatherAPI error: {e}")
-            if hasattr(e, 'response') and e.response is not None:
-                if e.response.status_code == 400:
-                    await message.reply_text(f"❌ City '{city}' not found. Please check the city name.")
-                else:
-                    await message.reply_text(f"❌ Error fetching weather: {str(e)}")
-            else:
-                await message.reply_text(f"❌ Error fetching weather: {str(e)}")
+            await message.reply_text(f"❌ Error fetching weather: {str(e)}")
     except Exception as e:
         logger.error(f"Error in weather: {e}")
         message = update.message or update.callback_query.message
@@ -285,76 +264,4 @@ async def handle_quote(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.error(f"Error in quote: {e}")
         message = update.message or update.callback_query.message
         await message.reply_text(f"❌ Error: {str(e)}")
-
-
-async def handle_translate(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle translate command using LibreTranslate API"""
-    try:
-        # Get text and target language
-        if update.message:
-            text = ' '.join(context.args) if context.args else update.message.text.strip()
-        else:
-            text = ' '.join(context.args) if context.args else None
-        
-        if not text or text.startswith('/'):
-            await update.message.reply_text(
-                "❌ Please provide text and target language.\n\n"
-                "Usage: `/translate <text> <target_language_code>`\n\n"
-                "Examples:\n"
-                "• `/translate Hello world en` (to English)\n"
-                "• `/translate Bonjour fr` (to French)\n\n"
-                "Common codes: en, es, fr, de, it, pt, ru, zh, ja",
-                parse_mode='Markdown'
-            )
-            return
-
-        # Parse text and language
-        parts = text.split()
-        if len(parts) < 2:
-            await update.message.reply_text(
-                "❌ Please provide both text and target language code.\n\n"
-                "Example: `/translate Hello world es`",
-                parse_mode='Markdown'
-            )
-            return
-        
-        target_lang = parts[-1].lower()
-        text_to_translate = ' '.join(parts[:-1])
-        
-        await update.message.reply_text(f"🌍 Translating to {target_lang}...")
-
-        try:
-            # LibreTranslate public API (free, no key required)
-            # You can also use a self-hosted instance
-            url = "https://libretranslate.de/translate"
-            data = {
-                'q': text_to_translate,
-                'source': 'auto',
-                'target': target_lang,
-                'format': 'text'
-            }
-            
-            response = requests.post(url, json=data, timeout=10)
-            response.raise_for_status()
-            result = response.json()
-            
-            translated_text = result.get('translatedText', 'Translation failed')
-            
-            await update.message.reply_text(
-                f"🌍 **Translation**\n\n"
-                f"📝 Original: {text_to_translate}\n"
-                f"🌐 Target: {target_lang}\n\n"
-                f"✨ Translated: {translated_text}",
-                parse_mode='Markdown'
-            )
-        except requests.RequestException as e:
-            logger.error(f"LibreTranslate API error: {e}")
-            await update.message.reply_text(
-                f"❌ Translation error: {str(e)}\n\n"
-                f"Make sure the language code is valid.\n"
-                f"Common codes: en, es, fr, de, it, pt, ru, zh, ja"
-            )
-    except Exception as e:
-        logger.error(f"Error in translate: {e}")
-        await update.message.reply_text(f"❌ Error: {str(e)}")
 

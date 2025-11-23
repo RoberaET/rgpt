@@ -9,13 +9,13 @@ A comprehensive Telegram bot built with Python that provides network diagnostic 
 - **Traceroute** - Perform traceroute to a host
 - **IP Info** - Get IP geolocation and ASN information
 - **Speedtest** - Run internet speed test
+- **Wake-on-LAN** - Wake up a PC remotely (authorized users only)
 
 ### 📋 Productivity Tools
 - **Reminder** - Set reminders for specific dates/times
 - **Todo** - Add, remove, and list tasks
-- **Weather** - Get current weather for any city
+- **Weather** - Get current weather for Addis Ababa, Ethiopia
 - **Quote** - Fetch motivational quotes
-- **Translate** - Translate text between languages
 
 ### 🤖 AI Assistant
 - **Gemini AI** - Ask any question by starting your message with `@rbot`
@@ -91,6 +91,12 @@ python bot.py
 - `/speedtest` - Run speed test
   - No arguments needed
 
+- `/wol <MAC>` or `/wake_pc <MAC>` - Wake up a PC remotely
+  - Example: `/wol 00:11:22:33:44:55`
+  - Example: `/wake_pc 00-11-22-33-44-55`
+  - **Security:** Only authorized users (configured in config.py)
+  - MAC formats: `00:11:22:33:44:55`, `00-11-22-33-44-55`, or `001122334455`
+
 #### Productivity Tools
 - `/reminder <time> <message>` - Set a reminder
   - Example: `/reminder 2024-12-25 10:00 Buy gifts`
@@ -100,16 +106,12 @@ python bot.py
 - `/todo remove <number>` - Remove a task
 - `/todo list` - List all tasks
 
-- `/weather <city>` - Get weather
-  - Example: `/weather London`
+- `/weather` - Get weather for Addis Ababa, Ethiopia
+  - No arguments needed
   - Requires: WeatherAPI.com API key
 
 - `/quote` - Get a motivational quote
   - No arguments needed
-
-- `/translate <text> <target_lang>` - Translate text
-  - Example: `/translate Hello world es`
-  - Language codes: en, es, fr, de, it, pt, ru, zh, ja
 
 #### AI Assistant
 - `@rbot <your question>` - Ask anything to the AI assistant
@@ -162,7 +164,6 @@ All API keys should be added to `config.py`:
 - Ping, Traceroute, Speedtest (use system commands)
 - IP Info (uses free IPinfo Lite API - token recommended but not required)
 - Quote (uses free quotable.io API)
-- Translate (uses free LibreTranslate public API)
 - Reminder and Todo (local storage)
 
 ### Features That Require API Keys
