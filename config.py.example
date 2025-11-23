@@ -1,0 +1,23 @@
+"""
+Configuration file for the Telegram Bot
+Copy this file to config.py and fill in your API keys
+"""
+
+# Required: Telegram Bot Token
+# Get it from @BotFather on Telegram
+BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN_HERE"
+
+# IPinfo Lite API Token (for IP Info)
+# Get a free token at: https://ipinfo.io/
+IPINFO_API_TOKEN = "YOUR_IPINFO_API_TOKEN_HERE"
+
+# WeatherAPI.com API Key (for Weather)
+# Get a free key at: https://www.weatherapi.com/
+# Leave empty if you don't want to use weather
+WEATHERAPI_KEY = "YOUR_WEATHERAPI_KEY_HERE"
+
+# Google Gemini AI API Key (for AI Assistant)
+# Get a free key at: https://makersuite.google.com/app/apikey
+# Leave empty if you don't want to use AI features
+GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE"
+
